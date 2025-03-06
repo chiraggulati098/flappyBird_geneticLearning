@@ -15,6 +15,9 @@ PIPE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("assets", "pi
 BASE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("assets", "base.png")))
 BG_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("assets", "bg.png")))
 
+# dont change for now, doesn't work
+FRAMERATE = 90
+
 # TODO: Implement score, collision detection and game abortion
 class Game:
     score = 0
@@ -30,7 +33,7 @@ class Pipes:
         self.x = 600 + 400 * pipe_no
 
     def reloc(self):
-        self.x -= 15
+        self.x -= 450 / FRAMERATE
         if self.x < 0:
             Game.score += 1
             self.x = 1200
@@ -58,26 +61,29 @@ class Bird:
         self.tilt = 0
         self.tick_count = 0
         self.y_vel = 0
-        self.x_vel = 15
+        self.x_vel = 450 / FRAMERATE
         self.height = y
         self.img_count = 0
         self.img = self.IMGS[0]
     
     def jump(self):
-        self.y_vel = -32
+        # possible issue with this
+        self.y_vel = -960 / FRAMERATE
+
         self.tick_count = 0
         self.height = self.y
 
     def move(self):
         self.tick_count += 1
         
-        self.y_vel += 5
+        # possible issue with this
+        self.y_vel += 4500 / FRAMERATE**2
 
-        if self.y_vel >= 20:
-            self.y_vel = 20
+        if self.y_vel >= 600 / FRAMERATE:
+            self.y_vel = 600 / FRAMERATE
         
-        if self.y_vel < -32:
-            self.y_vel = -52
+        if self.y_vel < -960 / FRAMERATE:
+            self.y_vel = -960 / FRAMERATE
         
         self.y = self.y + self.y_vel
 
@@ -112,7 +118,6 @@ def draw_window(win, bird, pipes):
     bird.draw(win)
     for i in pipes:
         i.draw(win)
-        print("pipe drawn")
     pygame.display.update()
 
 
@@ -127,7 +132,7 @@ def main():
 
     run = True
     while run:
-        clock.tick(30)
+        clock.tick(FRAMERATE)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
