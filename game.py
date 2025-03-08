@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import pygame
 import time
 import os
@@ -15,12 +17,31 @@ PIPE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("assets", "pi
 BASE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("assets", "base.png")))
 BG_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("assets", "bg.png")))
 
-# dont change for now, doesn't work
-FRAMERATE = 90
+CONCURRENT_PIPES = 3
+
+# Works for maximum 60
+FRAMERATE = 30
 
 # TODO: Implement score, collision detection and game abortion
 class Game:
     score = 0
+
+    # still a WIP, have to work with sprites
+    def collide_mask_rect(left, right):
+        xoffset = right.rect[0] - left.rect[0]
+        yoffset = right.rect[1] - left.rect[1]
+        try:
+            leftmask = left.mask
+        except AttributeError:
+            leftmask = pygame.mask.Mask(left.size, True)
+        try:
+            rightmask = right.mask
+        except AttributeError:
+            rightmask = pygame.mask.Mask(right.size, True)
+        return leftmask.overlap(rightmask, (xoffset, yoffset))
+
+    def collision_detected(Bird, ActivePipe):
+        return pygame.sprite.collide_mask(Bird, ActivePipe) == None
 
 class Pipes:
     PIPELOW = PIPE_IMG
@@ -34,13 +55,14 @@ class Pipes:
 
     def reloc(self):
         self.x -= 450 / FRAMERATE
-        if self.x < 0:
+        if self.x < -10:
             Game.score += 1
             self.x = 1200
             self.randomize_height()
 
     def randomize_height(self):
-        return 200 + 600 * random.random()
+        # Randomization appears to be skewed, to look into later
+        return 300 + 600 * random.random()
 
     def draw(self, win):
         self.rect_down = Pipes.PIPELOW.get_rect(center = Pipes.PIPELOW.get_rect(topleft = (self.x, self.height + self.WINDOW // 2 )).center)
@@ -103,7 +125,6 @@ class Bird:
             self.img_count = 0
 
         self.tilt = -math.atan(self.y_vel/self.x_vel)
-        print(self.y_vel, self.x_vel, self.tilt)
         
         rotated_image = pygame.transform.rotate(self.img, self.tilt * 180 / 3.1416)
         new_rect = rotated_image.get_rect(center = self.img.get_rect(topleft = (self.x, self.y)).center)
@@ -124,7 +145,9 @@ def draw_window(win, bird, pipes):
 def main():
     bird = Bird(50, 200)
     pipes = []
-    for i in range(3):
+    active_index = 0
+
+    for i in range(CONCURRENT_PIPES):
         pipes.append(Pipes(i))
 
     win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
@@ -143,8 +166,9 @@ def main():
         bird.move()
         for i in pipes:
             i.reloc()
+
         draw_window(win, bird, pipes)
-    
+
     pygame.quit()
     quit()
 
