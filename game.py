@@ -20,10 +20,10 @@ PIPE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("assets", "pi
 BASE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("assets", "base.png")))
 BG_IMG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "bg.png")).convert_alpha(), (600, 900))
 
-CONCURRENT_PIPES = 3
+CONCURRENT_PIPES = 6
 
 # Works for maximum 60
-FRAMERATE = 30
+FRAMERATE = 60
 
 # TODO: Implement score, collision detection and game abortion
 class Game:
@@ -50,29 +50,34 @@ class Pipes:
     PIPELOW = PIPE_IMG
     PIPEHIGH = pygame.transform.rotate(PIPE_IMG, 180)
     WINDOW = 200
+    PIPE_DISTANCE = 350
 
     def __init__(self, pipe_no):
-        # Pipes have to be initialized from 0 indexing
-        self.height = self.randomize_height()
-        self.x = 600 + 400 * pipe_no
+        self.x = WIN_WIDTH + self.PIPE_DISTANCE * pipe_no
+        self.height = 0
+        self.top = 0
+        self.bottom = 0
+        self.set_height()
 
-    def reloc(self):
+    def set_height(self):
+        """
+        set the height of the pipe, from the top of the screen
+        """
+        self.height = random.randrange(50, 450)
+        self.top = self.height - self.PIPEHIGH.get_height()
+        self.bottom = self.height + self.WINDOW
+
+    def reloc(self, pipes_list):
         self.x -= 450 / FRAMERATE
         if self.x + self.PIPELOW.get_width() < 0:  # Only remove when pipe is completely off screen
             Game.score += 1
-            self.x = 1200
-            self.randomize_height()
-
-    def randomize_height(self):
-        # Randomization appears to be skewed, to look into later
-        return 300 + 600 * random.random()
+            rightmost_x = max(pipe.x for pipe in pipes_list)
+            self.x = rightmost_x + self.PIPE_DISTANCE
+            self.set_height()
 
     def draw(self, win):
-        self.rect_down = Pipes.PIPELOW.get_rect(center = Pipes.PIPELOW.get_rect(topleft = (self.x, self.height + self.WINDOW // 2 )).center)
-        self.rect_up = Pipes.PIPEHIGH.get_rect(center = Pipes.PIPEHIGH.get_rect(bottomleft = (self.x, self.height - self.WINDOW // 2 )).center)
-
-        win.blit(Pipes.PIPELOW, self.rect_down.topleft)
-        win.blit(Pipes.PIPEHIGH, self.rect_up.topleft)
+        win.blit(self.PIPEHIGH, (self.x, self.top))
+        win.blit(self.PIPELOW, (self.x, self.bottom))
 
 class Bird:
     IMGS = BIRD_IMGS
@@ -192,7 +197,7 @@ def main():
         bird.move()
         base.move()
         for i in pipes:
-            i.reloc()
+            i.reloc(pipes)
 
         draw_window(win, bird, pipes, base)
 
