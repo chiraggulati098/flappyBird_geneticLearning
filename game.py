@@ -7,9 +7,10 @@ import math
 WIN_WIDTH = 600
 WIN_HEIGHT = 800
 
-# Initialize pygame display first
 pygame.init()
+pygame.font.init()  
 win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+STAT_FONT = pygame.font.SysFont("comicsans", 50)
 
 # Load images after display initialization
 BIRD_IMGS = [pygame.transform.scale2x(pygame.image.load(os.path.join("assets", "bird1.png"))),
@@ -168,6 +169,10 @@ def draw_window(win, bird, pipes, base):
     for i in pipes:
         i.draw(win)
     base.draw(win)
+    
+    score_label = STAT_FONT.render("Score: " + str(Game.score), 1, (255,255,255))
+    win.blit(score_label, (WIN_WIDTH - score_label.get_width() - 15, 10))
+    
     pygame.display.update()
 
 
