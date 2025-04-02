@@ -4,16 +4,21 @@ import os
 import random
 import math
 
-WIN_WIDTH = 500
+WIN_WIDTH = 600
 WIN_HEIGHT = 800
 
+# Initialize pygame display first
+pygame.init()
+win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+
+# Load images after display initialization
 BIRD_IMGS = [pygame.transform.scale2x(pygame.image.load(os.path.join("assets", "bird1.png"))),
             pygame.transform.scale2x(pygame.image.load(os.path.join("assets", "bird2.png"))),
             pygame.transform.scale2x(pygame.image.load(os.path.join("assets", "bird3.png")))
             ]
 PIPE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("assets", "pipe.png")))
 BASE_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("assets", "base.png")))
-BG_IMG = pygame.transform.scale2x(pygame.image.load(os.path.join("assets", "bg.png")))
+BG_IMG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "bg.png")).convert_alpha(), (600, 900))
 
 CONCURRENT_PIPES = 3
 
@@ -172,7 +177,6 @@ def main():
     for i in range(CONCURRENT_PIPES):
         pipes.append(Pipes(i))
 
-    win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
     clock = pygame.time.Clock()
 
     run = True
