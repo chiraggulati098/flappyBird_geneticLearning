@@ -49,7 +49,7 @@ class Pipes:
     PIPELOW = PIPE_IMG
     PIPEHIGH = pygame.transform.rotate(PIPE_IMG, 180)
     WINDOW = 200
-    PIPE_DISTANCE = 350
+    PIPE_DISTANCE = 400
 
     def __init__(self, pipe_no):
         self.x = WIN_WIDTH + self.PIPE_DISTANCE * pipe_no
