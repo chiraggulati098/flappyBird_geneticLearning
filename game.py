@@ -58,7 +58,7 @@ class Pipes:
 
     def reloc(self):
         self.x -= 450 / FRAMERATE
-        if self.x < -10:
+        if self.x + self.PIPELOW.get_width() < 0:  # Only remove when pipe is completely off screen
             Game.score += 1
             self.x = 1200
             self.randomize_height()
