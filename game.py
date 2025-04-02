@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import pygame
 import time
 import os
@@ -133,18 +131,42 @@ class Bird:
     def get_mask(self):
         return pygame.mask.from_surface(self.img)
 
+class Base:
+    VEL = 450 / FRAMERATE
+    WIDTH = BASE_IMG.get_width()
+    IMG = BASE_IMG
 
-def draw_window(win, bird, pipes):
+    def __init__(self, y):
+        self.y = y
+        self.x1 = 0
+        self.x2 = self.WIDTH
+
+    def move(self):
+        self.x1 -= self.VEL
+        self.x2 -= self.VEL
+        if self.x1 + self.WIDTH < 0:
+            self.x1 = self.x2 + self.WIDTH
+
+        if self.x2 + self.WIDTH < 0:
+            self.x2 = self.x1 + self.WIDTH
+
+    def draw(self, win):
+        win.blit(self.IMG, (self.x1, self.y))
+        win.blit(self.IMG, (self.x2, self.y))
+
+def draw_window(win, bird, pipes, base):
     win.blit(BG_IMG, (0, 0))
     bird.draw(win)
     for i in pipes:
         i.draw(win)
+    base.draw(win)
     pygame.display.update()
 
 
 def main():
     bird = Bird(50, 200)
     pipes = []
+    base = Base(730)  
     active_index = 0
 
     for i in range(CONCURRENT_PIPES):
@@ -164,10 +186,11 @@ def main():
                     bird.jump()
 
         bird.move()
+        base.move()
         for i in pipes:
             i.reloc()
 
-        draw_window(win, bird, pipes)
+        draw_window(win, bird, pipes, base)
 
     pygame.quit()
     quit()
