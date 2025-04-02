@@ -200,6 +200,20 @@ def game_loop():
 
         bird.move()
         base.move()
+        
+        # Check for collisions with base and window boundaries
+        bird_mask = bird.get_mask()
+        base_mask = pygame.mask.from_surface(base.IMG)
+        base_offset = (base.x1 - bird.x, base.y - round(bird.y))
+        
+        # Check collision with base
+        if bird_mask.overlap(base_mask, base_offset):
+            return True
+            
+        # Check if bird is too high or too low
+        if bird.y + bird.img.get_height() >= base.y or bird.y < 0:
+            return True
+            
         for i in pipes:
             i.reloc(pipes)
             if Game.collision_detected(bird, i):
