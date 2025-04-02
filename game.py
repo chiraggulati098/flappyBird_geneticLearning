@@ -29,22 +29,20 @@ FRAMERATE = 60
 class Game:
     score = 0
 
-    # still a WIP, have to work with sprites
-    def collide_mask_rect(left, right):
-        xoffset = right.rect[0] - left.rect[0]
-        yoffset = right.rect[1] - left.rect[1]
-        try:
-            leftmask = left.mask
-        except AttributeError:
-            leftmask = pygame.mask.Mask(left.size, True)
-        try:
-            rightmask = right.mask
-        except AttributeError:
-            rightmask = pygame.mask.Mask(right.size, True)
-        return leftmask.overlap(rightmask, (xoffset, yoffset))
+    def collision_detected(bird, pipe):
+        bird_mask = bird.get_mask()
+        top_mask = pygame.mask.from_surface(pipe.PIPEHIGH)
+        bottom_mask = pygame.mask.from_surface(pipe.PIPELOW)
+        top_offset = (pipe.x - bird.x, pipe.top - round(bird.y))
+        bottom_offset = (pipe.x - bird.x, pipe.bottom - round(bird.y))
 
-    def collision_detected(Bird, ActivePipe):
-        return pygame.sprite.collide_mask(Bird, ActivePipe) == None
+        b_point = bird_mask.overlap(bottom_mask, bottom_offset)
+        t_point = bird_mask.overlap(top_mask, top_offset)
+
+        if b_point or t_point:
+            return True
+
+        return False
 
 class Pipes:
     PIPELOW = PIPE_IMG
@@ -173,11 +171,12 @@ def draw_window(win, bird, pipes, base):
     pygame.display.update()
 
 
-def main():
+def game_loop():
     bird = Bird(50, 200)
     pipes = []
     base = Base(730)  
     active_index = 0
+    Game.score = 0  
 
     for i in range(CONCURRENT_PIPES):
         pipes.append(Pipes(i))
@@ -189,7 +188,7 @@ def main():
         clock.tick(FRAMERATE)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                run = False
+                return False  
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
                     bird.jump()
@@ -198,8 +197,15 @@ def main():
         base.move()
         for i in pipes:
             i.reloc(pipes)
+            if Game.collision_detected(bird, i):
+                return True  
 
         draw_window(win, bird, pipes, base)
+
+def main():
+    run = True
+    while run:
+        run = game_loop() 
 
     pygame.quit()
     quit()
