@@ -1,5 +1,6 @@
+import neat.population
 import pygame
-import time
+import neat
 import os
 import random
 import math
@@ -26,7 +27,6 @@ CONCURRENT_PIPES = 6
 # Works for maximum 60
 FRAMERATE = 60
 
-# TODO: Implement score, collision detection and game abortion
 class Game:
     score = 0
 
