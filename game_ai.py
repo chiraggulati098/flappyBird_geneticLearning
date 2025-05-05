@@ -243,6 +243,9 @@ def eval_genomes(genomes, config):
                 quit()
                 break
 
+        # Move the base
+        base.move()  
+
         # Determine which pipe to use for inputs
         pipe_ind = 0
         if len(birds) > 0:
