@@ -4,9 +4,11 @@ import neat
 import os
 import random
 import math
+from collections import deque
 
 WIN_WIDTH = 600
 WIN_HEIGHT = 800
+CONCURRENT_PIPES = 3  
 
 pygame.init()
 pygame.font.init()  
@@ -26,6 +28,7 @@ gen = 0
 
 class Game:
     score = 0
+    max_score = 0  
 
     def collision_detected(bird, pipe):
         bird_mask = bird.get_mask()
@@ -47,7 +50,7 @@ class Pipes:
     PIPEHIGH = pygame.transform.rotate(PIPE_IMG, 180)
     WINDOW = 200
     VEL = 450 / 60  # Match base game speed (450/FRAMERATE)
-    PIPE_DISTANCE = 150
+    PIPE_DISTANCE = 400  # Distance between pipes
 
     def __init__(self, x):
         self.x = x
@@ -190,7 +193,12 @@ def draw_window(win, birds, pipes, base, score, gen):
     # score
     score_label = STAT_FONT.render("Score: " + str(score),1,(255,255,255))
     win.blit(score_label, (WIN_WIDTH - score_label.get_width() - 15, 10))
-
+    
+    # max score - add these lines
+    Game.max_score = max(Game.max_score, score)
+    max_score_label = STAT_FONT.render("Max: " + str(Game.max_score),1,(255,255,255))
+    win.blit(max_score_label, (WIN_WIDTH - max_score_label.get_width() - 15, 50))
+    
     # generations
     gen_label = STAT_FONT.render("Gen: " + str(gen),1,(255,255,255))
     win.blit(gen_label, (10, 10))
@@ -216,7 +224,10 @@ def eval_genomes(genomes, config):
         ge.append(genome)
 
     base = Base(730)
-    pipes = [Pipes(700)]
+    # Initialize pipes with proper spacing
+    pipes = deque()
+    for i in range(CONCURRENT_PIPES):
+        pipes.append(Pipes(700 + i * Pipes.PIPE_DISTANCE))
     score = 0
 
     clock = pygame.time.Clock()
@@ -238,8 +249,10 @@ def eval_genomes(genomes, config):
             # Find the closest pipe ahead of any bird
             closest_dist = float('inf')
             for i, pipe in enumerate(pipes):
-                if pipe.x > birds[0].x:
-                    dist = pipe.x - birds[0].x
+                # Change condition to check if bird hasn't passed the right edge of pipe
+                pipe_right_edge = pipe.x + pipe.PIPELOW.get_width()
+                if pipe_right_edge > birds[0].x:
+                    dist = pipe_right_edge - birds[0].x
                     if dist < closest_dist:
                         closest_dist = dist
                         pipe_ind = i
@@ -249,11 +262,13 @@ def eval_genomes(genomes, config):
             ge[x].fitness += 0.1  # give small reward for staying alive
             bird.move()
 
-            # Neural network inputs - bird's height, distance to top pipe, distance to bottom pipe
+            # Neural network inputs - bird's height, distances to pipe edges
             output = nets[x].activate((
                 bird.y,
-                abs(bird.y - pipes[pipe_ind].height),
-                abs(bird.y - pipes[pipe_ind].bottom)
+                abs(bird.y - pipes[pipe_ind].height),  # distance to top pipe
+                abs(bird.y - pipes[pipe_ind].bottom),  # distance to bottom pipe
+                pipes[pipe_ind].x - bird.x,            # distance to pipe's leading edge
+                (pipes[pipe_ind].x + pipes[pipe_ind].PIPELOW.get_width()) - bird.x  # distance to pipe's trailing edge
             ))
 
             if output[0] > 0.5:  # tanh activation function output is between -1 and 1
@@ -275,27 +290,25 @@ def eval_genomes(genomes, config):
                     continue
 
                 # Check if bird passed pipe
-                if not pipe.passed and pipe.x < bird.x:
+                pipe_right_edge = pipe.x + pipe.PIPELOW.get_width()
+                if not pipe.passed and pipe_right_edge < bird.x:
                     pipe.passed = True
                     add_pipe = True
 
             # Remove pipes that are off screen
             if pipe.x + pipe.PIPELOW.get_width() < 0:
-                rem_pipes.append(pipe)
-
-        # Add new pipe and reward surviving birds
+                rem_pipes.append(pipe)            # Add new pipe and reward surviving birds
         if add_pipe:
             score += 1
             for g in ge:  # reward birds that made it through
                 g.fitness += 5
-            # Add new pipe with random distance
-            last_pipe = pipes[-1]
-            new_x = WIN_WIDTH + random.randrange(300, 400)
-            pipes.append(Pipes(new_x))
 
-        # Remove old pipes
+        # Remove old pipes and add new ones to maintain 5 pipes
         for r in rem_pipes:
             pipes.remove(r)
+            # Add new pipe at a fixed distance from the last pipe
+            new_x = pipes[-1].x + Pipes.PIPE_DISTANCE
+            pipes.append(Pipes(new_x))
 
         # Check for birds hitting ground or going too high
         for x, bird in enumerate(birds):
@@ -317,8 +330,8 @@ def run(config_file):
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
 
-    # Run for up to 50 generations
-    winner = p.run(eval_genomes, 50)
+    # Run for up to 200 generations
+    winner = p.run(eval_genomes, 200)
     print('\nBest genome:\n{!s}'.format(winner))
 
 if __name__ == '__main__':
