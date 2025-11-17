@@ -2,8 +2,8 @@
 # Modify these parameters to customize your research experiment
 
 # Environment Variables to Test
-WINDOW_SIZES = [250]  # Distance between upper and lower pipes
-PIPE_DISTANCES = [400, 500]  # Distance between consecutive pipes
+WINDOW_SIZES = [150, 200, 250, 300, 350]  # Distance between upper and lower pipes
+PIPE_DISTANCES = [300, 400, 500, 600, 700]  # Distance between consecutive pipes
 
 # Target Scores to Track
 TARGET_SCORES = [10, 20, 50, 100, 200]
