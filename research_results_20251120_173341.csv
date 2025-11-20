@@ -1,0 +1,6 @@
+window_size,pipe_distance,run_number,max_score_achieved,total_generations,completed,generations_to_10,generations_to_20,generations_to_50,generations_to_100,generations_to_200
+250,300,1,248,11,True,1,1,4,8,11
+250,400,1,186,50,False,2,2,2,4,N/A
+250,500,1,149,50,False,3,3,3,3,N/A
+250,600,1,124,50,False,5,5,5,5,N/A
+250,700,1,107,50,False,3,3,4,6,N/A
