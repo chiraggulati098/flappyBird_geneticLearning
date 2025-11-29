@@ -7,7 +7,7 @@ This project demonstrates the power of neuroevolution using the NEAT (NeuroEvolu
 The project uses genetic algorithms and neural networks to evolve birds that can navigate through pipes without human intervention. Each bird has its own neural network that processes environmental data and decides whether to flap or not.
 
 ```mermaid
-graph LR
+graph TD
     A[Population of 50 Birds] --> B[Each Bird has Neural Network]
     B --> C[Neural Network Inputs:<br/>• Bird Y Position<br/>• Distance to Top Pipe<br/>• Distance to Bottom Pipe<br/>• Horizontal Distance to Pipe<br/>• Pipe Gap Position]
     C --> D[Neural Network Output:<br/>Flap or Don't Flap]
@@ -17,10 +17,6 @@ graph LR
     G --> H[Mutation & Crossover]
     H --> I[New Generation]
     I --> A
-    
-    style A fill:#e1f5fe
-    style F fill:#fff3e0
-    style I fill:#f3e5f5
 ```
 
 ## Core Components
