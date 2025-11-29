@@ -2,15 +2,16 @@
 # Modify these parameters to customize your research experiment
 
 # Environment Variables to Test
-WINDOW_SIZES = [150, 200, 250, 300, 350]  # Distance between upper and lower pipes
+# WINDOW_SIZES = [150, 200, 250, 300, 350]  Distance between upper and lower pipes
+WINDOW_SIZES = [150]
 PIPE_DISTANCES = [300, 400, 500, 600, 700]  # Distance between consecutive pipes
 
 # Target Scores to Track
 TARGET_SCORES = [10, 20, 50, 100, 200]
 
 # Training Parameters
-MAX_GENERATIONS = 100  # Maximum generations per experiment
-RUNS_PER_CONFIG = 3    # Number of runs per configuration (for statistical significance)
+MAX_GENERATIONS = 50  # Maximum generations per experiment
+RUNS_PER_CONFIG = 1    # Number of runs per configuration (for statistical significance)
 
 # NEAT Parameters (you can also modify config-feedforward.txt)
 POPULATION_SIZE = 50   # Size of each generation
